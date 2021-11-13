@@ -4,6 +4,7 @@ const cors = require("cors");
 
 // get the full list of albums
 const albumsData = require("./albums");
+const { request } = require("express");
 
 const app = express();
 
@@ -19,12 +20,42 @@ function newID() {
     while(ids.includes(`${nextId}`)) {
         nextId++;
     }
-    return nextId;
+    return String(nextId);
 }
 
 app.get("/albums", (request, response) => {
     response.status(200).send(albumsData);
 });
+
+app.delete("/albums/:id", (request, response) => {
+
+    const index = albumsData.findIndex((element) => {
+        return element.albumId === request.params.id
+    }) 
+
+  if (index === -1) {
+      response.sendStatus(404);
+  } else {
+      const deleteAlbum = albumsData.splice(index, 1);
+      response.sendStatus(204)  
+  }  
+});
+
+app.put("/albums/:id", (request, response) => {
+
+  const index = albumsData.findIndex((element) => {
+        return element.albumId === request.params.id
+    })
+
+  if (index === -1) {
+      response.sendStatus(404);
+  } else {
+      const updateAlbum = request.body
+      albumsData[index] = updateAlbum
+      response.sendStatus(204)
+  }
+});
+
 
 
 app.listen(SERVER_PORT, () => console.log(`Server running on ${SERVER_PORT}`));
